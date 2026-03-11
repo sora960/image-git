@@ -1,0 +1,15 @@
+# Binaries
+image-git
+*.exe
+
+# Local Data Store (The "Heart" stays local)
+data/
+
+# Temporary Test Assets
+bg.png
+fg.png
+test.png
+character.png
+
+# Go workspace
+vendor/

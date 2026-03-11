@@ -15,19 +15,24 @@ func main() {
 	repoName := flag.String("repo", "test-repo", "Name of the target repository")
 	layerName := flag.String("name", "base-layer", "The descriptive name for this layer")
 	doComposite := flag.Bool("composite", false, "Generate a preview.png by merging all layers")
-	
+	targetFrame := flag.Int("frame", 0, "The specific frame index to render")
+	startFrame := flag.Int("start", 0, "Starting frame for a new layer")
+	endFrame := flag.Int("end", 999, "Ending frame for a new layer")
 	flag.Parse()
 
-	// 2. Handle Compositing
-	if *doComposite {
-		fmt.Printf("🎨 Image-Git: Merging layers for repo '%s'...\n", *repoName)
-		err := gitlogic.CompositeLayers(*repoName)
-		if err != nil {
-			log.Fatalf("❌ Compositing failed: %v", err)
-		}
-		fmt.Printf("✅ Success! Created: data/repositories/%s/preview.png\n", *repoName)
-		return
-	}
+// 2. Handle Compositing
+    if *doComposite {
+        // If the user didn't change the default frame (or specifically asked for 0), 
+        // we can render a specific frame.
+        fmt.Printf("🎬 Image-Git: Rendering Frame %d for repo '%s'...\n", *targetFrame, *repoName)
+        
+        // Use the new frame-aware logic
+        err := gitlogic.CompositeFrame(*repoName, *targetFrame) 
+        if err != nil {
+            log.Fatalf("❌ Compositing failed: %v", err)
+        }
+        return
+    }
 
 	// 3. Handle Storing
 	if *filePath == "" {
@@ -50,6 +55,8 @@ func main() {
 		Name:    *layerName,
 		Hash:    hash,
 		Opacity: 1.0,
+		StartFrame: *startFrame,
+		EndFrame:   *endFrame,
 	}
 	manifest.Layers = append(manifest.Layers, newLayer)
 

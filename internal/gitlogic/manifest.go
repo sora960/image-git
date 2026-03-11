@@ -11,6 +11,8 @@ type Layer struct {
 	Name    string  `json:"name"`
 	Hash    string  `json:"hash"`
 	Opacity float64 `json:"opacity"`
+	StartFrame int     `json:"start_frame"` // When it appears
+    EndFrame   int     `json:"end_frame"`   // When it disappears
 }
 
 // Manifest represents the state of an entire artwork project
