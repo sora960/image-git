@@ -9,9 +9,6 @@ Current collaboration tools (Figma, Canva) are "synchronous"—if one person edi
 - **Pull Request** their specific layers for review by an Art Director.
 - **Merge** pixels seamlessly using content-addressable storage.
 
-## 🌟 The Vision: Unified Visual Version Control
-Image-Git is designed to handle both static and temporal visual assets:
-
 1. **Image Collab (Layers):** Asynchronous branching for illustrations. 
    - *Example:* Artist A branches to try a "Cyberpunk" lighting layer while the Master branch remains "Fantasy" style.
    
@@ -32,3 +29,4 @@ Image-Git is designed to handle both static and temporal visual assets:
 
 ## 🛠️ Status: Conceptual MVP
 Current Milestone: Implementing **Layer-as-a-Blob** storage using Go.
+
