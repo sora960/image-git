@@ -15,24 +15,17 @@ func main() {
 	repoName := flag.String("repo", "test-repo", "Name of the target repository")
 	layerName := flag.String("name", "base-layer", "The descriptive name for this layer")
 	doComposite := flag.Bool("composite", false, "Generate a preview.png by merging all layers")
-	targetFrame := flag.Int("frame", 0, "The specific frame index to render")
+	targetFrame := flag.Int("frame", -1, "The specific frame index to render")
 	startFrame := flag.Int("start", 0, "Starting frame for a new layer")
 	endFrame := flag.Int("end", 999, "Ending frame for a new layer")
+	zIndex := flag.Int("z", 0, "Z-Index for the layer (lower is further back)")
+	opacity := flag.Float64("opacity", 1.0, "Opacity of the layer (0.0 to 1.0)")
 	flag.Parse()
 
 // 2. Handle Compositing
-    if *doComposite {
-        // Scenario A: Render a range of frames (Sequence)
-        if *endFrame > *startFrame && *targetFrame == 0 { 
-            err := gitlogic.CompositeSequence(*repoName, *startFrame, *endFrame)
-            if err != nil {
-                log.Fatalf("❌ Animation render failed: %v", err)
-            }
-            fmt.Println("✅ Animation sequence rendered successfully.")
-            return
-        }
-
-        // Scenario B: Render a single specific frame
+if *doComposite {
+    // If user provided a specific frame (not -1), render just that one
+    if *targetFrame != -1 {
         fmt.Printf("🎬 Image-Git: Rendering Frame %d for repo '%s'...\n", *targetFrame, *repoName)
         err := gitlogic.CompositeFrame(*repoName, *targetFrame)
         if err != nil {
@@ -41,6 +34,17 @@ func main() {
         fmt.Printf("✅ Success! Created frame_%04d.png\n", *targetFrame)
         return
     }
+
+    // Otherwise, if they gave a range (and no specific frame), do the sequence
+    if *endFrame > *startFrame {
+        err := gitlogic.CompositeSequence(*repoName, *startFrame, *endFrame)
+        if err != nil {
+            log.Fatalf("❌ Animation render failed: %v", err)
+        }
+        fmt.Println("✅ Animation sequence rendered successfully.")
+        return
+    }
+}
 
 	// 3. Handle Storing
 	if *filePath == "" {
@@ -62,9 +66,10 @@ func main() {
 	newLayer := gitlogic.Layer{
 		Name:    *layerName,
 		Hash:    hash,
-		Opacity: 1.0,
+		Opacity: *opacity,
 		StartFrame: *startFrame,
 		EndFrame:   *endFrame,
+		ZIndex:     *zIndex,
 	}
 	manifest.Layers = append(manifest.Layers, newLayer)
 

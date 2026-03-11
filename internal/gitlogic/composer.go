@@ -3,10 +3,12 @@ package gitlogic
 import (
 	"fmt"
 	"image"
+	"image/color"
 	"image/draw"
 	"image/png"
 	"os"
 	"path/filepath"
+	"sort"
 )
 
 // CompositeLayers merges all layers in a manifest into one preview image
@@ -16,7 +18,10 @@ func CompositeLayers(repoName string) error {
 		return err
 	}
 
-	// Create a transparent canvas
+	sort.Slice(m.Layers, func(i, j int) bool {
+		return m.Layers[i].ZIndex < m.Layers[j].ZIndex
+	})
+
 	canvas := image.NewRGBA(image.Rect(0, 0, 500, 500))
 
 	for _, layer := range m.Layers {
@@ -32,11 +37,11 @@ func CompositeLayers(repoName string) error {
 			continue
 		}
 
-		// Draw layer onto canvas using the "Over" operator (Standard transparency blending)
-		draw.Draw(canvas, canvas.Bounds(), img, image.Point{}, draw.Over)
+		// Apply Opacity via Mask
+		mask := image.NewUniform(color.Alpha16{uint16(layer.Opacity * 65535)})
+		draw.DrawMask(canvas, canvas.Bounds(), img, image.Point{}, mask, image.Point{}, draw.Over)
 	}
 
-	// Save the final result
 	outPath := filepath.Join("data", "repositories", repoName, "preview.png")
 	out, _ := os.Create(outPath)
 	defer out.Close()
@@ -50,10 +55,13 @@ func CompositeFrame(repoName string, frame int) error {
 		return err
 	}
 
+	sort.Slice(m.Layers, func(i, j int) bool {
+		return m.Layers[i].ZIndex < m.Layers[j].ZIndex
+	})
+
 	canvas := image.NewRGBA(image.Rect(0, 0, 500, 500))
 
 	for _, layer := range m.Layers {
-		// Only draw if the current frame is within the layer's lifespan
 		if frame >= layer.StartFrame && frame <= layer.EndFrame {
 			path := filepath.Join("data", "repositories", repoName, "objects", layer.Hash+".png")
 			f, err := os.Open(path)
@@ -67,11 +75,12 @@ func CompositeFrame(repoName string, frame int) error {
 				continue
 			}
 
-			draw.Draw(canvas, canvas.Bounds(), img, image.Point{}, draw.Over)
+			// Apply Opacity via Mask
+			mask := image.NewUniform(color.Alpha16{uint16(layer.Opacity * 65535)})
+			draw.DrawMask(canvas, canvas.Bounds(), img, image.Point{}, mask, image.Point{}, draw.Over)
 		}
 	}
 
-	// Save as a frame-specific preview
 	outPath := filepath.Join("data", "repositories", repoName, fmt.Sprintf("frame_%04d.png", frame))
 	out, _ := os.Create(outPath)
 	defer out.Close()
