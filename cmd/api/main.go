@@ -146,5 +146,26 @@ api.Patch("/repo/:name/layers/:layerName", func(c *fiber.Ctx) error {
 		return c.JSON(fiber.Map{"status": "success", "frame": frame})
 	})
 
+	// Issue #17: Render Final Composite
+	api.Post("/repo/:name/render", func(c *fiber.Ctx) error {
+		repo := c.Params("name")
+
+		// 1. Trigger your Go logic to composite layers
+		// This should sort by Z-index and apply alpha blending
+		err := gitlogic.RenderRepository(repo) 
+		if err != nil {
+			return c.Status(500).JSON(fiber.Map{"error": "Rendering failed: " + err.Error()})
+		}
+
+		return c.JSON(fiber.Map{"message": "Render successful", "preview": "/api/v1/objects/preview.png"})
+	})
+
+	// Issue #18: Serve the specific preview file with correct headers
+	api.Get("/preview.png", func(c *fiber.Ctx) error {
+		c.Set("Content-Type", "image/png")
+		c.Set("Cache-Control", "no-cache, no-store, must-revalidate")
+		return c.SendFile("./data/repositories/art-project/preview.png")
+	})
+
 	log.Fatal(app.Listen(":3000"))
 }

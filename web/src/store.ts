@@ -17,6 +17,9 @@ interface StudioState {
     updateZIndex: (name: string, delta: number) => Promise<void>
     removeLayer: (name: string) => Promise<void>
     addLayer: (file: File) => Promise<void>
+    renderPreview: () => Promise<void>
+    previewUrl: string | null
+    setPreviewUrl: (url: string | null) => void
 
 }
 
@@ -24,6 +27,8 @@ export const useStore = create<StudioState>((set, get) => ({
     layers: [],
     repoName: 'art-project',
     isLoading: false,
+    previewUrl: null,
+    setPreviewUrl: (url) => set({ previewUrl: url }),
 
 
     // Inside useStore in store.ts
@@ -114,7 +119,32 @@ export const useStore = create<StudioState>((set, get) => ({
             // Rollback if server fails
             set({ layers: previousLayers })
         }
+    },
+
+    renderPreview: async () => {
+        const { repoName, setPreviewUrl } = get()
+        set({ isLoading: true })
+
+        try {
+            const res = await fetch(`http://localhost:3000/api/v1/repo/${repoName}/render`, {
+                method: 'POST'
+            })
+            // Inside your useStore's renderPreview function:
+            if (res.ok) {
+                // Generate a unique string for every render
+                const timestamp = Date.now();
+                const freshUrl = `http://localhost:3000/api/v1/preview.png?t=${timestamp}`;
+
+                set({ previewUrl: freshUrl });
+            }
+        } catch (err) {
+            console.error("Render failed", err)
+        } finally {
+            set({ isLoading: false })
+        }
     }
+
+
 
 
 

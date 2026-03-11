@@ -1,28 +1,20 @@
 {
   "layers": [
     {
-      "name": "character",
-      "hash": "557aba7afdb23d8e5af99afb1f11115d4beda63c9195c494388572b768b6f9ec",
+      "name": "Untitled design",
+      "hash": "f7e2f77067ebe466b787281a5f3e81a54be5005d8513d548a2e0d35a303d4d5d",
       "opacity": 1,
       "start_frame": 0,
-      "end_frame": 0,
-      "z_index": 10
+      "end_frame": 999,
+      "z_index": 0
     },
     {
-      "name": "ghost-layer",
-      "hash": "8d8b0c6631d0b58c125c4073205c04357a7a8c3d4ee06d4ede236d99b1caf164",
-      "opacity": 0.37,
+      "name": "20260201_17h29m15s_grim",
+      "hash": "5e183c2e130d24675a8247e76c6302da8dd6d6e984ceee33e52020976c4001e8",
+      "opacity": 0.59,
       "start_frame": 0,
       "end_frame": 999,
-      "z_index": 6
-    },
-    {
-      "name": "1773034739",
-      "hash": "8dc9fb3927f382294f68fad586b4787909332e08ac61b2f0b7b9b35041d7c9f6",
-      "opacity": 0.91,
-      "start_frame": 0,
-      "end_frame": 999,
-      "z_index": 8
+      "z_index": 1
     }
   ]
 }

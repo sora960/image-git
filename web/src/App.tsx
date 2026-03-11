@@ -1,9 +1,9 @@
 import { useEffect } from 'react'
 import { useStore } from './store'
-import { Layers, RefreshCw, ChevronUp, ChevronDown, Trash2, Plus, } from 'lucide-react'
+import { Layers, RefreshCw, ChevronUp, ChevronDown, Trash2, Plus, X, Download } from 'lucide-react'
 
 function App() {
-  const { layers, addLayer, fetchLayers, isLoading, updateLayerOpacity, updateZIndex, removeLayer } = useStore()
+  const { layers, addLayer, fetchLayers, isLoading, updateLayerOpacity, updateZIndex, removeLayer, renderPreview, previewUrl, setPreviewUrl } = useStore()
 
   // Fetch layers from Go backend on mount
   useEffect(() => {
@@ -115,16 +115,15 @@ function App() {
           ))}
 
 
-
-
-
-
-
-
-
-
-
-
+          <div className="p-4 border-t border-zinc-800 bg-zinc-900/80">
+            <button
+              onClick={renderPreview}
+              disabled={isLoading}
+              className="w-full py-2.5 bg-zinc-100 hover:bg-white text-zinc-950 rounded-md font-bold text-xs uppercase tracking-widest transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+            >
+              {isLoading ? <RefreshCw size={14} className="animate-spin" /> : "Render Composite"}
+            </button>
+          </div>
 
 
         </div>
@@ -147,7 +146,44 @@ function App() {
             ))}
         </div>
       </main>
+      {/* Issue #18: Render Preview Modal */}
+      {previewUrl && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-10">
+          <div className="relative bg-zinc-900 border border-zinc-800 rounded-xl shadow-2xl max-w-5xl w-full overflow-hidden flex flex-col">
+            <div className="p-4 border-b border-zinc-800 flex justify-between items-center bg-zinc-900/50">
+              <h3 className="text-sm font-bold uppercase tracking-widest text-zinc-400">Final Export Preview</h3>
+              <button
+                onClick={() => setPreviewUrl(null)}
+                className="p-2 hover:bg-zinc-800 rounded-full text-zinc-500 hover:text-white transition-colors"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className="flex-1 bg-[radial-gradient(#27272a_1px,transparent_1px)] [background-size:20px_20px] p-8 flex items-center justify-center overflow-auto">
+              <img src={previewUrl} alt="Render Preview" className="max-w-full max-h-full shadow-2xl rounded border border-zinc-700" />
+            </div>
+
+            <div className="p-4 bg-zinc-950/50 border-t border-zinc-800 flex justify-end gap-3">
+              <button
+                onClick={() => setPreviewUrl(null)}
+                className="px-6 py-2 text-xs font-bold uppercase tracking-widest text-zinc-500 hover:text-zinc-300 transition-colors"
+              >
+                Close
+              </button>
+              <a
+                href={previewUrl}
+                download="export.png"
+                className="px-6 py-2 bg-zinc-100 hover:bg-white text-zinc-950 rounded font-bold text-xs uppercase tracking-widest flex items-center gap-2 transition-all"
+              >
+                <Download size={14} /> Download PNG
+              </a>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
+
   )
 }
 
