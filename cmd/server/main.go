@@ -20,7 +20,37 @@ func main() {
 	endFrame := flag.Int("end", 999, "Ending frame for a new layer")
 	zIndex := flag.Int("z", 0, "Z-Index for the layer (lower is further back)")
 	opacity := flag.Float64("opacity", 1.0, "Opacity of the layer (0.0 to 1.0)")
+    deleteLayer := flag.String("delete", "", "Name of the layer to remove from the manifest")
+	showStatus := flag.Bool("status", false, "Show the current layer stack for the repo")
 	flag.Parse()
+
+
+// 1. Handle Status Table
+if *showStatus {
+	m, err := gitlogic.LoadManifest(*repoName)
+	if err != nil {
+		log.Fatalf("❌ Failed to load manifest: %v", err)
+	}
+	fmt.Printf("\n📂 Repository: %s\n", *repoName)
+	fmt.Printf("%-12s | %-8s | %-3s | %-10s | %-7s\n", "NAME", "HASH", "Z", "RANGE", "ALPHA")
+	fmt.Println("------------------------------------------------------------")
+	for _, l := range m.Layers {
+		fmt.Printf("%-12s | %-8s | %-3d | %d-%-7d | %.2f\n", 
+			l.Name, l.Hash[:8], l.ZIndex, l.StartFrame, l.EndFrame, l.Opacity)
+	}
+	return
+}
+
+// 2. Handle Deletion
+if *deleteLayer != "" {
+	err := gitlogic.RemoveLayer(*repoName, *deleteLayer)
+	if err != nil {
+		log.Fatalf("❌ Delete failed: %v", err)
+	}
+	fmt.Printf("🗑️  Layer '%s' removed from %s manifest.\n", *deleteLayer, *repoName)
+	return
+}
+
 
 // 2. Handle Compositing
 if *doComposite {

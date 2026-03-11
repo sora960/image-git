@@ -2,6 +2,7 @@ package gitlogic
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
 	"path/filepath"
 )
@@ -48,3 +49,30 @@ func SaveManifest(repoName string, m Manifest) error {
 	}
 	return os.WriteFile(path, data, 0644)
 }
+
+// RemoveLayer searches for a layer by name and removes it from the manifest
+func RemoveLayer(repoName string, layerName string) error {
+    m, err := LoadManifest(repoName)
+    if err != nil {
+        return err
+    }
+
+    var updatedLayers []Layer
+    found := false
+
+    for _, l := range m.Layers {
+        if l.Name == layerName {
+            found = true
+            continue // Skip the layer we want to delete
+        }
+        updatedLayers = append(updatedLayers, l)
+    }
+
+    if !found {
+        return fmt.Errorf("layer '%s' not found", layerName)
+    }
+
+    m.Layers = updatedLayers
+    return SaveManifest(repoName, m)
+}
+
