@@ -1,0 +1,8 @@
+@import "tailwindcss";
+
+/* Minimalist Dark Theme Base */
+:root {
+  background-color: #09090b;
+  /* Zinc-950 */
+  color: #fafafa;
+}
