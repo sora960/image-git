@@ -1,9 +1,9 @@
 import { useEffect } from 'react'
 import { useStore } from './store'
-import { Layers, RefreshCw } from 'lucide-react'
+import { Layers, RefreshCw, ChevronUp, ChevronDown } from 'lucide-react'
 
 function App() {
-  const { layers, fetchLayers, isLoading, updateLayerOpacity } = useStore()
+  const { layers, fetchLayers, isLoading, updateLayerOpacity, updateZIndex } = useStore()
 
   // Fetch layers from Go backend on mount
   useEffect(() => {
@@ -40,14 +40,32 @@ function App() {
               key={layer.hash}
               className="p-3 rounded-lg bg-zinc-800/40 border border-zinc-800 hover:border-zinc-700 transition-all space-y-3 group"
             >
-              <div className="flex justify-between items-start">
-                <div className="overflow-hidden">
+              <div className="flex justify-between items-start gap-4">
+                <div className="overflow-hidden flex-1">
                   <span className="text-sm font-medium truncate block">{layer.name}</span>
                   <p className="text-[10px] font-mono text-zinc-600 truncate">{layer.hash}</p>
                 </div>
-                <span className="text-[10px] font-mono text-zinc-500 bg-zinc-900 px-1.5 py-0.5 rounded">
-                  Z: {layer.z_index}
-                </span>
+
+                {/* Issue #14: Z-Index Controls */}
+                <div className="flex flex-col items-center bg-zinc-900 rounded border border-zinc-800 self-center">
+                  <button
+                    onClick={() => updateZIndex(layer.name, 1)}
+                    className="p-1 hover:text-white hover:bg-zinc-800 rounded-t transition-colors"
+                    title="Move Forward"
+                  >
+                    <ChevronUp size={14} />
+                  </button>
+                  <span className="text-[10px] font-mono font-bold border-y border-zinc-800 px-2 py-0.5 bg-zinc-950">
+                    {layer.z_index}
+                  </span>
+                  <button
+                    onClick={() => updateZIndex(layer.name, -1)}
+                    className="p-1 hover:text-white hover:bg-zinc-800 rounded-b transition-colors"
+                    title="Move Backward"
+                  >
+                    <ChevronDown size={14} />
+                  </button>
+                </div>
               </div>
 
               {/* Opacity Slider - Issue #12 */}

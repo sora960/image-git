@@ -35,14 +35,15 @@ func main() {
 // This maps http://localhost:3000/api/v1/objects/HASH.png to the physical file
 api.Static("/objects", "./data/repositories/art-project/objects")
 
-	// [PATCH] Update Layer Opacity - Issue #12
+// [PATCH] Update Layer Properties (Opacity or Z-Index) - Issue #12 & #14
 api.Patch("/repo/:name/layers/:layerName", func(c *fiber.Ctx) error {
     repo := c.Params("name")
     layerName := c.Params("layerName")
 
-    // Define a minimalist struct for the incoming request
+    // Use pointers so we can check if a field is nil (not provided in JSON)
     type UpdateRequest struct {
-        Opacity float64 `json:"opacity"`
+        Opacity *float64 `json:"opacity"`
+        ZIndex  *int     `json:"z_index"`
     }
 
     var req UpdateRequest
@@ -50,17 +51,22 @@ api.Patch("/repo/:name/layers/:layerName", func(c *fiber.Ctx) error {
         return c.Status(400).JSON(fiber.Map{"error": "Invalid request body"})
     }
 
-    // 1. Load the current manifest
     manifest, err := gitlogic.LoadManifest(repo)
     if err != nil {
         return c.Status(404).JSON(fiber.Map{"error": "Repository not found"})
     }
 
-    // 2. Find and update the specific layer
     updated := false
     for i := range manifest.Layers {
         if manifest.Layers[i].Name == layerName {
-            manifest.Layers[i].Opacity = req.Opacity
+            // Apply Opacity if provided
+            if req.Opacity != nil {
+                manifest.Layers[i].Opacity = *req.Opacity
+            }
+            // Apply Z-Index if provided
+            if req.ZIndex != nil {
+                manifest.Layers[i].ZIndex = *req.ZIndex
+            }
             updated = true
             break
         }
@@ -70,12 +76,11 @@ api.Patch("/repo/:name/layers/:layerName", func(c *fiber.Ctx) error {
         return c.Status(404).JSON(fiber.Map{"error": "Layer not found"})
     }
 
-    // 3. Save the modified manifest back to disk
     if err := gitlogic.SaveManifest(repo, manifest); err != nil {
-        return c.Status(500).JSON(fiber.Map{"error": "Failed to save manifest"})
+        return c.Status(500).JSON(fiber.Map{"error": "Failed to save"})
     }
 
-    return c.SendStatus(204) // Success (No Content)
+    return c.SendStatus(204)
 })
 
 // Inside cmd/api/main.go, update the POST handler:

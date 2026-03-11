@@ -14,6 +14,7 @@ interface StudioState {
     fetchLayers: () => Promise<void>
     // NEW: Update function for Issue #12
     updateLayerOpacity: (name: string, opacity: number) => Promise<void>
+    updateZIndex: (name: string, delta: number) => Promise<void>
 }
 
 export const useStore = create<StudioState>((set, get) => ({
@@ -32,16 +33,33 @@ export const useStore = create<StudioState>((set, get) => ({
         }
     },
 
-    // Logic for Issue #12
+    updateZIndex: async (name, delta) => {
+        const { repoName, layers } = get()
+        const updatedLayers = layers.map(l =>
+            l.name === name ? { ...l, z_index: l.z_index + delta } : l
+        )
+
+        set({ layers: updatedLayers })
+
+        try {
+            // URL updated to generic PATCH route (removed /z)
+            await fetch(`http://localhost:3000/api/v1/repo/${repoName}/layers/${name}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ z_index: updatedLayers.find(l => l.name === name)?.z_index })
+            })
+        } catch (err) {
+            console.error("Z-Index sync failed", err)
+        }
+    },
+
     updateLayerOpacity: async (name, opacity) => {
-        // 1. Optimistic Update (Immediate UI response)
         const previousLayers = get().layers
         set({
             layers: previousLayers.map(l => l.name === name ? { ...l, opacity } : l)
         })
 
         try {
-            // 2. Sync to Go Backend
             await fetch(`http://localhost:3000/api/v1/repo/${get().repoName}/layers/${name}`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
@@ -49,7 +67,6 @@ export const useStore = create<StudioState>((set, get) => ({
             })
         } catch (err) {
             console.error("Sync failed:", err)
-            // Rollback if server fails
             set({ layers: previousLayers })
         }
     }
