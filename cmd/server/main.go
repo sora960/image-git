@@ -22,6 +22,7 @@ func main() {
 	opacity := flag.Float64("opacity", 1.0, "Opacity of the layer (0.0 to 1.0)")
     deleteLayer := flag.String("delete", "", "Name of the layer to remove from the manifest")
 	showStatus := flag.Bool("status", false, "Show the current layer stack for the repo")
+	doPrune := flag.Bool("prune", false, "Clean up unused image objects in the repository")
 	flag.Parse()
 
 
@@ -51,8 +52,18 @@ if *deleteLayer != "" {
 	return
 }
 
+// 2. Add logic block (place it near --delete or --status)
+if *doPrune {
+    count, err := gitlogic.PruneObjects(*repoName)
+    if err != nil {
+        log.Fatalf("❌ Prune failed: %v", err)
+    }
+    fmt.Printf("🧹 Pruning complete. Removed %d orphaned objects from %s.\n", count, *repoName)
+    return
+}
 
-// 2. Handle Compositing
+
+// 3. Handle Compositing
 if *doComposite {
     // If user provided a specific frame (not -1), render just that one
     if *targetFrame != -1 {

@@ -76,3 +76,36 @@ func RemoveLayer(repoName string, layerName string) error {
     return SaveManifest(repoName, m)
 }
 
+// PruneObjects removes files from the objects folder that are not referenced in the manifest
+func PruneObjects(repoName string) (int, error) {
+    m, err := LoadManifest(repoName)
+    if err != nil {
+        return 0, err
+    }
+
+    // Build a map of referenced hashes
+    referenced := make(map[string]bool)
+    for _, l := range m.Layers {
+        referenced[l.Hash+".png"] = true
+    }
+
+    objDir := filepath.Join("data", "repositories", repoName, "objects")
+    files, err := os.ReadDir(objDir)
+    if err != nil {
+        return 0, err
+    }
+
+    count := 0
+    for _, f := range files {
+        if !referenced[f.Name()] {
+            err := os.Remove(filepath.Join(objDir, f.Name()))
+            if err != nil {
+                fmt.Printf("⚠️  Failed to delete %s: %v\n", f.Name(), err)
+                continue
+            }
+            count++
+        }
+    }
+    return count, nil
+}
+
