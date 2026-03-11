@@ -1,0 +1,14 @@
+{
+  "layers": [
+    {
+      "name": "background",
+      "hash": "acf9be480956b320b40c0e5e69807d8f8e36516d1d7fe0855328074066fc0ff4",
+      "opacity": 1
+    },
+    {
+      "name": "character",
+      "hash": "1f9e7a8385201e99326c4012d8ebc9d4c3edc85e34ec85ecb17950dc4087b6de",
+      "opacity": 1
+    }
+  ]
+}
