@@ -77,3 +77,15 @@ func CompositeFrame(repoName string, frame int) error {
 	defer out.Close()
 	return png.Encode(out, canvas)
 }
+
+// CompositeSequence loops through a range of frames and renders each one.
+func CompositeSequence(repoName string, start int, end int) error {
+	fmt.Printf("🎞️  Rendering sequence from frame %d to %d...\n", start, end)
+	for i := start; i <= end; i++ {
+		err := CompositeFrame(repoName, i)
+		if err != nil {
+			return fmt.Errorf("error at frame %d: %w", i, err)
+		}
+	}
+	return nil
+}

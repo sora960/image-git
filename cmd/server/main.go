@@ -22,15 +22,23 @@ func main() {
 
 // 2. Handle Compositing
     if *doComposite {
-        // If the user didn't change the default frame (or specifically asked for 0), 
-        // we can render a specific frame.
-        fmt.Printf("🎬 Image-Git: Rendering Frame %d for repo '%s'...\n", *targetFrame, *repoName)
-        
-        // Use the new frame-aware logic
-        err := gitlogic.CompositeFrame(*repoName, *targetFrame) 
-        if err != nil {
-            log.Fatalf("❌ Compositing failed: %v", err)
+        // Scenario A: Render a range of frames (Sequence)
+        if *endFrame > *startFrame && *targetFrame == 0 { 
+            err := gitlogic.CompositeSequence(*repoName, *startFrame, *endFrame)
+            if err != nil {
+                log.Fatalf("❌ Animation render failed: %v", err)
+            }
+            fmt.Println("✅ Animation sequence rendered successfully.")
+            return
         }
+
+        // Scenario B: Render a single specific frame
+        fmt.Printf("🎬 Image-Git: Rendering Frame %d for repo '%s'...\n", *targetFrame, *repoName)
+        err := gitlogic.CompositeFrame(*repoName, *targetFrame)
+        if err != nil {
+            log.Fatalf("❌ Single frame render failed: %v", err)
+        }
+        fmt.Printf("✅ Success! Created frame_%04d.png\n", *targetFrame)
         return
     }
 
