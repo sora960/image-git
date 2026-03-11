@@ -71,10 +71,21 @@ function App() {
         </div>
       </aside>
 
-      {/* Main Canvas Area */}
-      <main className="flex-1 bg-[radial-gradient(#27272a_1px,transparent_1px)] [background-size:24px_24px] flex items-center justify-center">
-        <div className="p-8 border-2 border-dashed border-zinc-800 rounded-3xl text-zinc-700 font-mono text-sm italic">
-          Canvas Preview Pipeline Offline
+      {/* Main Canvas Area - Issue #13 */}
+      <main className="flex-1 bg-[radial-gradient(#27272a_1px,transparent_1px)] [background-size:24px_24px] flex items-center justify-center relative overflow-hidden">
+        <div className="relative w-[800px] h-[600px] bg-zinc-900 shadow-2xl rounded-lg border border-zinc-800 overflow-hidden">
+          {/* Stack the layers based on their Z-Index */}
+          {[...layers]
+            .sort((a, b) => a.z_index - b.z_index)
+            .map((layer) => (
+              <img
+                key={layer.hash}
+                src={`http://localhost:3000/api/v1/objects/${layer.hash}.png`}
+                alt={layer.name}
+                className="absolute inset-0 w-full h-full object-contain pointer-events-none transition-opacity duration-200"
+                style={{ opacity: layer.opacity }}
+              />
+            ))}
         </div>
       </main>
     </div>

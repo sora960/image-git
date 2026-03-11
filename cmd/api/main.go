@@ -31,6 +31,10 @@ func main() {
 		return c.JSON(manifest)
 	})
 
+// Issue #13: Serve raw blobs from the object store
+// This maps http://localhost:3000/api/v1/objects/HASH.png to the physical file
+api.Static("/objects", "./data/repositories/art-project/objects")
+
 	// [PATCH] Update Layer Opacity - Issue #12
 api.Patch("/repo/:name/layers/:layerName", func(c *fiber.Ctx) error {
     repo := c.Params("name")
