@@ -15,12 +15,35 @@ interface StudioState {
     // NEW: Update function for Issue #12
     updateLayerOpacity: (name: string, opacity: number) => Promise<void>
     updateZIndex: (name: string, delta: number) => Promise<void>
+    removeLayer: (name: string) => Promise<void>
+    addLayer: (file: File) => Promise<void>
+
 }
 
 export const useStore = create<StudioState>((set, get) => ({
     layers: [],
     repoName: 'art-project',
     isLoading: false,
+
+
+    // Inside useStore in store.ts
+    addLayer: async (file: File) => {
+        const { repoName, fetchLayers } = get()
+        const formData = new FormData()
+        formData.append('image', file)
+        formData.append('name', file.name.split('.')[0])
+        formData.append('z', '0')
+
+        try {
+            const res = await fetch(`http://localhost:3000/api/v1/repo/${repoName}/layers`, {
+                method: 'POST',
+                body: formData,
+            })
+            if (res.ok) await fetchLayers()
+        } catch (err) {
+            console.error("Upload failed", err)
+        }
+    },
 
     fetchLayers: async () => {
         set({ isLoading: true })
@@ -69,5 +92,30 @@ export const useStore = create<StudioState>((set, get) => ({
             console.error("Sync failed:", err)
             set({ layers: previousLayers })
         }
+    },
+
+    // Add inside useStore:
+    removeLayer: async (name) => {
+        const { repoName, layers } = get()
+
+        // 1. Optimistic UI update
+        const previousLayers = layers
+        set({ layers: layers.filter(l => l.name !== name) })
+
+        try {
+            // 2. Sync to Go Backend (using your existing DELETE route)
+            const res = await fetch(`http://localhost:3000/api/v1/repo/${repoName}/layers/${name}`, {
+                method: 'DELETE',
+            })
+
+            if (!res.ok) throw new Error("Delete failed on server")
+        } catch (err) {
+            console.error("Delete sync failed", err)
+            // Rollback if server fails
+            set({ layers: previousLayers })
+        }
     }
+
+
+
 }))

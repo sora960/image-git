@@ -1,20 +1,28 @@
 {
   "layers": [
     {
-      "name": "background",
-      "hash": "5e21dababcc961935d5060233b5abaf6c59727408634aea3ed9552b2cb2915b7",
-      "opacity": 1,
-      "start_frame": 0,
-      "end_frame": 0,
-      "z_index": 2
-    },
-    {
       "name": "character",
       "hash": "557aba7afdb23d8e5af99afb1f11115d4beda63c9195c494388572b768b6f9ec",
       "opacity": 1,
       "start_frame": 0,
       "end_frame": 0,
-      "z_index": 2
+      "z_index": 10
+    },
+    {
+      "name": "ghost-layer",
+      "hash": "8d8b0c6631d0b58c125c4073205c04357a7a8c3d4ee06d4ede236d99b1caf164",
+      "opacity": 0.37,
+      "start_frame": 0,
+      "end_frame": 999,
+      "z_index": 6
+    },
+    {
+      "name": "1773034739",
+      "hash": "8dc9fb3927f382294f68fad586b4787909332e08ac61b2f0b7b9b35041d7c9f6",
+      "opacity": 0.91,
+      "start_frame": 0,
+      "end_frame": 999,
+      "z_index": 8
     }
   ]
 }

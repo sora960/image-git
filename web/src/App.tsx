@@ -1,9 +1,9 @@
 import { useEffect } from 'react'
 import { useStore } from './store'
-import { Layers, RefreshCw, ChevronUp, ChevronDown } from 'lucide-react'
+import { Layers, RefreshCw, ChevronUp, ChevronDown, Trash2, Plus, } from 'lucide-react'
 
 function App() {
-  const { layers, fetchLayers, isLoading, updateLayerOpacity, updateZIndex } = useStore()
+  const { layers, addLayer, fetchLayers, isLoading, updateLayerOpacity, updateZIndex, removeLayer } = useStore()
 
   // Fetch layers from Go backend on mount
   useEffect(() => {
@@ -14,16 +14,28 @@ function App() {
     <div className="h-screen bg-zinc-950 text-zinc-100 font-sans flex overflow-hidden">
       {/* Sidebar */}
       <aside className="w-80 border-r border-zinc-800 bg-zinc-900/50 flex flex-col">
+        {/* Replace the header in App.tsx */}
         <header className="p-6 border-b border-zinc-800 flex justify-between items-center">
           <h1 className="text-xs font-bold uppercase tracking-tighter italic text-zinc-400">
             Image-Git Studio
           </h1>
-          <button
-            onClick={fetchLayers}
-            className="p-2 hover:bg-zinc-800 rounded-md transition-colors"
-          >
-            <RefreshCw size={14} className={isLoading ? "animate-spin" : ""} />
-          </button>
+          <div className="flex gap-1">
+            <label className="p-2 hover:bg-zinc-800 rounded-md cursor-pointer transition-colors text-zinc-400 hover:text-white">
+              <Plus size={14} />
+              <input
+                type="file"
+                className="hidden"
+                accept="image/png"
+                onChange={(e) => e.target.files?.[0] && addLayer(e.target.files[0])}
+              />
+            </label>
+            <button
+              onClick={fetchLayers}
+              className="p-2 hover:bg-zinc-800 rounded-md transition-colors text-zinc-400 hover:text-white"
+            >
+              <RefreshCw size={14} className={isLoading ? "animate-spin" : ""} />
+            </button>
+          </div>
         </header>
 
         <div className="flex-1 overflow-y-auto p-4 space-y-2">
@@ -35,40 +47,55 @@ function App() {
             <p className="text-xs text-zinc-600 px-2 italic">No layers found in manifest.</p>
           )}
 
+
           {layers.map((layer) => (
             <div
               key={layer.hash}
-              className="p-3 rounded-lg bg-zinc-800/40 border border-zinc-800 hover:border-zinc-700 transition-all space-y-3 group"
+              className="p-3 rounded-lg bg-zinc-800/40 border border-zinc-800 hover:border-zinc-700 transition-all space-y-4 group"
             >
-              <div className="flex justify-between items-start gap-4">
-                <div className="overflow-hidden flex-1">
-                  <span className="text-sm font-medium truncate block">{layer.name}</span>
-                  <p className="text-[10px] font-mono text-zinc-600 truncate">{layer.hash}</p>
+              {/* Header Row: Info + Z-Controls */}
+              <div className="flex justify-between items-center gap-3">
+                <div className="flex-1 overflow-hidden">
+                  <div className="flex items-center gap-2 mb-0.5">
+                    <span className="text-sm font-medium truncate text-zinc-200">
+                      {layer.name}
+                    </span>
+                    {/* Issue #15: Trash icon appears on card hover */}
+                    <button
+                      onClick={() => {
+                        if (confirm(`Delete layer "${layer.name}"?`)) removeLayer(layer.name)
+                      }}
+                      className="opacity-0 group-hover:opacity-100 p-1 text-zinc-500 hover:text-red-400 transition-all"
+                    >
+                      <Trash2 size={12} />
+                    </button>
+                  </div>
+                  <p className="text-[10px] font-mono text-zinc-600 truncate uppercase">
+                    {layer.hash.substring(0, 12)}...
+                  </p>
                 </div>
 
-                {/* Issue #14: Z-Index Controls */}
-                <div className="flex flex-col items-center bg-zinc-900 rounded border border-zinc-800 self-center">
+                {/* Issue #14: Z-Index Stack */}
+                <div className="flex flex-col items-center bg-zinc-950 rounded border border-zinc-800 shrink-0">
                   <button
                     onClick={() => updateZIndex(layer.name, 1)}
                     className="p-1 hover:text-white hover:bg-zinc-800 rounded-t transition-colors"
-                    title="Move Forward"
                   >
-                    <ChevronUp size={14} />
+                    <ChevronUp size={12} />
                   </button>
-                  <span className="text-[10px] font-mono font-bold border-y border-zinc-800 px-2 py-0.5 bg-zinc-950">
+                  <span className="text-[10px] font-mono font-bold border-y border-zinc-800 px-2 bg-zinc-900 leading-tight">
                     {layer.z_index}
                   </span>
                   <button
                     onClick={() => updateZIndex(layer.name, -1)}
                     className="p-1 hover:text-white hover:bg-zinc-800 rounded-b transition-colors"
-                    title="Move Backward"
                   >
-                    <ChevronDown size={14} />
+                    <ChevronDown size={12} />
                   </button>
                 </div>
               </div>
 
-              {/* Opacity Slider - Issue #12 */}
+              {/* Issue #12: Opacity Slider */}
               <div className="space-y-1.5">
                 <div className="flex justify-between text-[10px] uppercase tracking-wider text-zinc-500 font-bold">
                   <span>Opacity</span>
@@ -86,6 +113,20 @@ function App() {
               </div>
             </div>
           ))}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         </div>
       </aside>
 
