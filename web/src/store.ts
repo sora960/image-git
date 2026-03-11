@@ -122,7 +122,7 @@ export const useStore = create<StudioState>((set, get) => ({
     },
 
     renderPreview: async () => {
-        const { repoName, setPreviewUrl } = get()
+        const { repoName } = get()
         set({ isLoading: true })
 
         try {
@@ -143,9 +143,5 @@ export const useStore = create<StudioState>((set, get) => ({
             set({ isLoading: false })
         }
     }
-
-
-
-
 
 }))
