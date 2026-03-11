@@ -1,6 +1,5 @@
 import { create } from 'zustand'
 
-// The TypeScript "Contract" - must match your Go 'Layer' struct
 export interface Layer {
     name: string
     hash: string
@@ -13,25 +12,45 @@ interface StudioState {
     repoName: string
     isLoading: boolean
     fetchLayers: () => Promise<void>
+    // NEW: Update function for Issue #12
+    updateLayerOpacity: (name: string, opacity: number) => Promise<void>
 }
 
 export const useStore = create<StudioState>((set, get) => ({
     layers: [],
-    repoName: 'art-project', // Default repo from your git diff
+    repoName: 'art-project',
     isLoading: false,
 
     fetchLayers: async () => {
         set({ isLoading: true })
         try {
             const res = await fetch(`http://localhost:3000/api/v1/repo/${get().repoName}`)
-            if (!res.ok) throw new Error("Backend unreachable")
             const data = await res.json()
-
-            // We ensure layers is always an array to prevent .map() crashes
             set({ layers: data.layers || [], isLoading: false })
         } catch (err) {
-            console.error("API Error:", err)
             set({ isLoading: false })
         }
     },
+
+    // Logic for Issue #12
+    updateLayerOpacity: async (name, opacity) => {
+        // 1. Optimistic Update (Immediate UI response)
+        const previousLayers = get().layers
+        set({
+            layers: previousLayers.map(l => l.name === name ? { ...l, opacity } : l)
+        })
+
+        try {
+            // 2. Sync to Go Backend
+            await fetch(`http://localhost:3000/api/v1/repo/${get().repoName}/layers/${name}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ opacity })
+            })
+        } catch (err) {
+            console.error("Sync failed:", err)
+            // Rollback if server fails
+            set({ layers: previousLayers })
+        }
+    }
 }))

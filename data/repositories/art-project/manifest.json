@@ -3,12 +3,18 @@
     {
       "name": "background",
       "hash": "5e21dababcc961935d5060233b5abaf6c59727408634aea3ed9552b2cb2915b7",
-      "opacity": 1
+      "opacity": 0.7,
+      "start_frame": 0,
+      "end_frame": 0,
+      "z_index": 0
     },
     {
       "name": "character",
       "hash": "557aba7afdb23d8e5af99afb1f11115d4beda63c9195c494388572b768b6f9ec",
-      "opacity": 1
+      "opacity": 1,
+      "start_frame": 0,
+      "end_frame": 0,
+      "z_index": 0
     }
   ]
 }

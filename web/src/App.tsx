@@ -3,7 +3,7 @@ import { useStore } from './store'
 import { Layers, RefreshCw } from 'lucide-react'
 
 function App() {
-  const { layers, fetchLayers, isLoading } = useStore()
+  const { layers, fetchLayers, isLoading, updateLayerOpacity } = useStore()
 
   // Fetch layers from Go backend on mount
   useEffect(() => {
@@ -38,15 +38,34 @@ function App() {
           {layers.map((layer) => (
             <div
               key={layer.hash}
-              className="p-3 rounded-lg bg-zinc-800/40 border border-zinc-800 hover:border-zinc-700 transition-all group"
+              className="p-3 rounded-lg bg-zinc-800/40 border border-zinc-800 hover:border-zinc-700 transition-all space-y-3 group"
             >
               <div className="flex justify-between items-start">
-                <span className="text-sm font-medium truncate">{layer.name}</span>
-                <span className="text-[10px] font-mono text-zinc-500">Z: {layer.z_index}</span>
+                <div className="overflow-hidden">
+                  <span className="text-sm font-medium truncate block">{layer.name}</span>
+                  <p className="text-[10px] font-mono text-zinc-600 truncate">{layer.hash}</p>
+                </div>
+                <span className="text-[10px] font-mono text-zinc-500 bg-zinc-900 px-1.5 py-0.5 rounded">
+                  Z: {layer.z_index}
+                </span>
               </div>
-              <p className="text-[10px] font-mono text-zinc-600 truncate mt-1">
-                {layer.hash}
-              </p>
+
+              {/* Opacity Slider - Issue #12 */}
+              <div className="space-y-1.5">
+                <div className="flex justify-between text-[10px] uppercase tracking-wider text-zinc-500 font-bold">
+                  <span>Opacity</span>
+                  <span className="text-zinc-300">{Math.round(layer.opacity * 100)}%</span>
+                </div>
+                <input
+                  type="range"
+                  min="0"
+                  max="1"
+                  step="0.01"
+                  value={layer.opacity}
+                  onChange={(e) => updateLayerOpacity(layer.name, parseFloat(e.target.value))}
+                  className="w-full h-1 bg-zinc-700 rounded-lg appearance-none cursor-pointer accent-zinc-100 hover:accent-white transition-all"
+                />
+              </div>
             </div>
           ))}
         </div>
