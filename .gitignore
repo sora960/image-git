@@ -13,3 +13,7 @@ character.png
 
 # Go workspace
 vendor/temp/
+engine
+*.exe
+*.exe_*
+vendor/
