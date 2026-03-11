@@ -12,4 +12,4 @@ test.png
 character.png
 
 # Go workspace
-vendor/
+vendor/temp/
